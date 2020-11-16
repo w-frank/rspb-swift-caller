@@ -4,9 +4,9 @@
 #include <SoftwareSerial.h>
 #include <Arduino.h>
 
-SoftwareSerial mySerial(10, 11);
+SoftwareSerial mp3Serial(10, 11);
 
-extern boolean isPlaying;
+boolean isPlaying;
 
 #define Start_Byte 0x7E
 #define Version_Byte 0xFF
@@ -15,12 +15,12 @@ extern boolean isPlaying;
 #define Acknowledge 0x00 // Returns info with command 0x41 [0x01: info, 0x00: no info]
 
 void mp3Init();
-void playFirst();
-void pause();
-void play();
-void playNext();
-void playPrevious();
-void setVolume(int volume);
+void mp3PlayFirst();
+void mp3Pause();
+void mp3Play();
+void mp3PlayNext();
+void mp3PlayPrevious();
+void mp3SetVolume(int volume);
 void execute_CMD(byte CMD, byte Par1, byte Par2);
 
 #endif

@@ -1,10 +1,11 @@
 // Date and time functions using a DS3231 RTC connected via I2C and Wire lib
 #include <RTClib.h>
+#include "mp3Player.h"
 
 DateTime DATE_WINDOW_START = DateTime(0, 5, 1, 0, 0, 0);
-DateTime DATE_WINDOW_STOP = DateTime(99, 9, 1, 0, 0, 0);
+DateTime DATE_WINDOW_STOP = DateTime(99, 12, 1, 0, 0, 0);
 DateTime MORNING_CALL_TIME = DateTime(0, 0, 0, 6, 20, 0);
-DateTime EVENING_CALL_TIME = DateTime(0, 0, 0, 22, 23, 0);
+DateTime EVENING_CALL_TIME = DateTime(0, 0, 0, 22, 28, 0);
 
 RTC_DS3231 rtc;
 
@@ -13,11 +14,6 @@ void setup ()
 {
 
     Serial.begin(115200);
-
-    #ifndef ESP8266
-    //while (!Serial); // wait for serial port to connect. Needed for native USB
-    #endif
-
     Serial.println("Initialising swift caller");
 
     if (! rtc.begin()) 
@@ -38,7 +34,8 @@ void setup ()
         // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
     }
 
-    // initialize digital pin LED_BUILTIN as an output
+    mp3Init();
+
     pinMode(LED_BUILTIN, OUTPUT);
 }
 
@@ -50,6 +47,7 @@ void loop ()
         digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
         delay(1000);                       // wait for a second
         digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+        mp3PlayFirst();
 
     }
 
@@ -60,6 +58,8 @@ bool checkTimeToCall()
     bool timeToCall = 0;
     DateTime now = rtc.now();
 
+    Serial.println(now.timestamp());
+
     if (now.month() >= DATE_WINDOW_START.month() && now.month() <= DATE_WINDOW_STOP.month())
     {
 
@@ -67,7 +67,6 @@ bool checkTimeToCall()
             now.timestamp(now.TIMESTAMP_TIME) == EVENING_CALL_TIME.timestamp(EVENING_CALL_TIME.TIMESTAMP_TIME))
         {
             timeToCall = 1;
-            Serial.print(now.timestamp());
         }
     }
 
