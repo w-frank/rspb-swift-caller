@@ -1,30 +1,110 @@
+/**
+ * Copyright (C) 2020 Will Frank
+ *                                             
+ * This file is part of the Swift Caller.                                          
+ * 
+ *    This program is free software: you can redistribute it and/or modify  
+ *    it under the terms of the GNU General Public License as published by  
+ *    the Free Software Foundation, version 3.
+ *
+ *    This program is distributed in the hope that it will be useful, but 
+ *    WITHOUT ANY WARRANTY; without even the implied warranty of 
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ *    General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License 
+ *    along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file swift_caller.ino
+ * @author Will Frank
+ * @date 22 Nov 2020
+ * @brief Main program for the Swift Caller.
+ *
+ * Here typically goes a more extensive explanation of what the program
+ * does and any dependencies. Doxygens tags are words preceeded by either 
+ * a backslash @\ or by an at symbol @@.
+ * @see http://www.stack.nl/~dimitri/doxygen/docblocks.html
+ * @see http://www.stack.nl/~dimitri/doxygen/commands.html
+ */
+
+// Atmel AVR power Management and sleep modes
+#include <avr/sleep.h>
 // Date and time functions using a DS3231 RTC connected via I2C and Wire lib
 #include <RTClib.h>
-#include "mp3Player.h"
+#include <TimeLib.h>
+// DFPlayer MP3 player library and software serial communication
+#include "SoftwareSerial.h"
+#include <DFRobotDFPlayerMini.h>
 
-DateTime DATE_WINDOW_START = DateTime(0, 5, 1, 0, 0, 0);
-DateTime DATE_WINDOW_STOP = DateTime(99, 12, 1, 0, 0, 0);
-DateTime MORNING_CALL_TIME = DateTime(0, 0, 0, 6, 20, 0);
-DateTime EVENING_CALL_TIME = DateTime(0, 0, 0, 22, 28, 0);
+const int INTERRUPT_PIN = 2;
+
+DateTime MORNING_CALL_TIME = DateTime(0, 0, 0, 6, 30, 0);  // 6:30 am BST
+DateTime EVENING_CALL_TIME = DateTime(0, 0, 0, 16, 00, 0); // 16:00 pm BST
+DateTime SEASON_START_TIME = DateTime(0, 5, 1, 6, 20, 0);  // May 1st at 6:20 am BST
+DateTime SEASON_END_TIME   = DateTime(0, 12, 1, 0, 0, 0);  // August 1st
+
+tmElements_t playForTime;
 
 RTC_DS3231 rtc;
 
+SoftwareSerial dfPlayerSoftwareSerial(10, 11); // DFPlayer RX, TX
+DFRobotDFPlayerMini dfPlayer;
 
-void setup ()
-{
-
+/**
+ * Initialisation.
+ * Called once when program starts.
+ */
+void setup() {
     Serial.begin(115200);
-    Serial.println("Initialising swift caller");
+    initRTC();
+    initDFPlayer();
+    setAlarms();
 
-    if (! rtc.begin()) 
-    {
-        Serial.println("Couldn't find RTC");
+    playForTime.Hour = 2;
+    playForTime.Minute = 30;
+    playForTime.Second = 0;
+}
+
+/**
+ * Main program loop.
+ */
+void loop() {
+
+    sendToSleep();
+
+    // -- sleeping -- //
+
+    Serial.println("Just woke up!");
+
+    // loop through all available mp3s for playForTime
+    dfPlayer.enableLoopAll();
+
+    static unsigned long timer = millis();
+  
+    while (millis() - timer < timeToMillis(playForTime)) {
+        // continue looping mp3s for playForTime
+    }
+
+    dfPlayer.disableLoopAll();
+ 
+    setAlarms();
+
+}
+
+/**
+ * RTC initialisation.
+ */
+void initRTC() {
+
+    if (!rtc.begin()) {
+        Serial.println("Fatal error: couldn't find RTC");
         Serial.flush();
         abort();
     }
 
-    if (rtc.lostPower()) 
-    {
+    if (rtc.lostPower()) {
         Serial.println("RTC lost power, let's set the time!");
         // When time needs to be set on a new device, or after a power loss, the
         // following line sets the RTC to the date & time this sketch was compiled
@@ -34,41 +114,116 @@ void setup ()
         // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
     }
 
-    mp3Init();
+    // not using the 32K pin, so disable it
+    rtc.disable32K();
+    
+    // configure the alarm to trigger an interrupt
+    pinMode(INTERRUPT_PIN, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), onAlarm, FALLING);
+    
+    // set alarm 1, 2 flag to false (so alarm 1, 2 didn't happen so far)
+    // if not done, this easily leads to problems, as both register aren't 
+    // reset on reboot/recompile
+    rtc.clearAlarm(1);
+    rtc.clearAlarm(2);
+    
+    // stop oscillating signals at SQW Pin
+    // otherwise setAlarm1 will fail
+    rtc.writeSqwPinMode(DS3231_OFF);
 
-    pinMode(LED_BUILTIN, OUTPUT);
 }
 
-void loop () 
-{
+/**
+ * DFPlayer initialisation.
+ */
+void initDFPlayer() {
 
-    if (checkTimeToCall())
-    {
-        digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-        delay(1000);                       // wait for a second
-        digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-        mp3PlayFirst();
-
+   if (!dfPlayer.begin(dfPlayerSoftwareSerial)) {
+        Serial.println("Error: unable to begin DFPlayer");
     }
 
+    dfPlayer.volume(30); // range from 0 to 30
+
 }
 
-bool checkTimeToCall()
-{
-    bool timeToCall = 0;
-    DateTime now = rtc.now();
+/**
+ * Send Arduino to sleep and attach wake interrupt.
+ */
+void sendToSleep() {
 
-    Serial.println(now.timestamp());
+    Serial.println("Sending to sleep... zzz");
+    delay(1000); // wait for serial print
+    sleep_enable();
+    attachInterrupt(0, onAlarm, LOW);
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_cpu();
 
-    if (now.month() >= DATE_WINDOW_START.month() && now.month() <= DATE_WINDOW_STOP.month())
-    {
+}
 
-        if (now.timestamp(now.TIMESTAMP_TIME) == MORNING_CALL_TIME.timestamp(MORNING_CALL_TIME.TIMESTAMP_TIME) || 
-            now.timestamp(now.TIMESTAMP_TIME) == EVENING_CALL_TIME.timestamp(EVENING_CALL_TIME.TIMESTAMP_TIME))
-        {
-            timeToCall = 1;
+/**
+ * Alarm Interrupt Service Routine (ISR).
+ * Wake Arduino and detach interrupt.
+ */
+void onAlarm() {
+
+    Serial.println("Interrupt fired!");
+    sleep_disable();
+    detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN));
+
+}
+
+/**
+ * Set AM and PM alarms for swift calls.
+ * If currently outside of swift season then set alarm
+ * to start of swift season.
+ */
+void setAlarms() {
+
+    // check if month is in swift season or not
+    if(rtc.now().month() < SEASON_END_TIME.month()) {
+        // in swift season
+        Serial.println("In swift season");
+        // set Alarm 1 when hours, minutes and seconds = AM call time
+        if(!rtc.setAlarm1(MORNING_CALL_TIME, DS3231_A1_Hour)) {
+            Serial.println("Error: failed to set AM alarm");
+        }
+        else {
+            Serial.println("AM alarm set");  
+        }
+
+        // set Alarm 2 when hours and minutes = PM call time
+        if(!rtc.setAlarm2(EVENING_CALL_TIME, DS3231_A2_Hour)) {
+            Serial.println("Error: failed to set PM alarm");
+        }
+        else {
+            Serial.println("PM alarm set");  
         }
     }
+    else {
+        // outside swift season
+        Serial.println("Outside of swift season");
+        // set alarm when date (day of month), hours and minutes = season start
+        if(!rtc.setAlarm1(SEASON_START_TIME, DS3231_A1_Date)) {
+            Serial.println("Error: failed to set season start alarm");
+        }
+        else {
+            Serial.println("Season start alarm set");  
+        }
+    }
+}
 
-    return timeToCall;
+/**
+ * Convert time (H, M, S) to milliseconds. 
+ * 
+ * Maximum is 4294967295 ms = 49 days, 17 hours, 2 minutes, 47 seconds.
+ * 
+ * @param time tmElements_t of hours, minutes and seconds to convert.
+ * @return time in milliseconds.
+ */
+unsigned long timeToMillis(tmElements_t time) {
+
+    unsigned long timeMillis = time.Hour * 60UL * 60UL * 1000UL;
+    timeMillis += (time.Minute * 60UL * 1000UL);
+    return timeMillis;
+
 }
