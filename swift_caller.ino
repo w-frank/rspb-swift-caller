@@ -29,8 +29,8 @@
  * @see http://www.stack.nl/~dimitri/doxygen/commands.html
  */
 
-// Atmel AVR power Management and sleep modes
-#include <avr/sleep.h>
+// Arduino low power modes
+#include <LowPower.h>
 // Date and time functions using a DS3231 RTC connected via I2C and Wire lib
 #include <RTClib.h>
 #include <TimeLib.h>
@@ -41,7 +41,7 @@
 const int INTERRUPT_PIN = 2;
 
 DateTime MORNING_CALL_TIME = DateTime(0, 0, 0, 6, 30, 0);  // 6:30 am BST
-DateTime EVENING_CALL_TIME = DateTime(0, 0, 0, 16, 00, 0); // 16:00 pm BST
+DateTime EVENING_CALL_TIME = DateTime(0, 0, 0, 16, 28, 0); // 16:00 pm BST
 DateTime SEASON_START_TIME = DateTime(0, 5, 1, 6, 20, 0);  // May 1st at 6:20 am BST
 DateTime SEASON_END_TIME   = DateTime(0, 12, 1, 0, 0, 0);  // August 1st
 
@@ -58,13 +58,17 @@ DFRobotDFPlayerMini dfPlayer;
  */
 void setup() {
     Serial.begin(115200);
+    Serial.println("--- Swift Caller ---");
+
+    builtinLEDControl(LOW);
     initRTC();
     initDFPlayer();
     setAlarms();
 
-    playForTime.Hour = 2;
-    playForTime.Minute = 30;
+    playForTime.Hour = 0;
+    playForTime.Minute = 1;
     playForTime.Second = 0;
+
 }
 
 /**
@@ -138,7 +142,9 @@ void initRTC() {
  */
 void initDFPlayer() {
 
-   if (!dfPlayer.begin(dfPlayerSoftwareSerial)) {
+    dfPlayerSoftwareSerial.begin(9600);
+
+    if (!dfPlayer.begin(dfPlayerSoftwareSerial)) {
         Serial.println("Error: unable to begin DFPlayer");
     }
 
@@ -153,10 +159,12 @@ void sendToSleep() {
 
     Serial.println("Sending to sleep... zzz");
     delay(1000); // wait for serial print
-    sleep_enable();
-    attachInterrupt(0, onAlarm, LOW);
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    sleep_cpu();
+    //sleep_enable();
+    //attachInterrupt(0, onAlarm, LOW);
+
+    // Enter power down state with ADC and BOD module disabled
+    // Wake up when falling edge on interrupt pin
+    LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
 
 }
 
@@ -167,7 +175,7 @@ void sendToSleep() {
 void onAlarm() {
 
     Serial.println("Interrupt fired!");
-    sleep_disable();
+    //sleep_disable();
     detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN));
 
 }
@@ -226,4 +234,14 @@ unsigned long timeToMillis(tmElements_t time) {
     timeMillis += (time.Minute * 60UL * 1000UL);
     return timeMillis;
 
+}
+
+/**
+ * Set Arduino built-in LED state (LOW/HIGH) 
+ *
+ * @param state LED state (LOW/HIGH = OFF/ON)
+ */
+void builtinLEDControl(bool state) {
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, state);
 }
