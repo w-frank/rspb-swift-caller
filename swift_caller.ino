@@ -40,12 +40,12 @@
 
 const int INTERRUPT_PIN = 2;
 
-DateTime MORNING_CALL_TIME = DateTime(0, 0, 0, 6, 30, 0);  // 6:30 am BST
-DateTime EVENING_CALL_TIME = DateTime(0, 0, 0, 16, 28, 0); // 16:00 pm BST
-DateTime SEASON_START_TIME = DateTime(0, 5, 1, 6, 20, 0);  // May 1st at 6:20 am BST
-DateTime SEASON_END_TIME   = DateTime(0, 12, 1, 0, 0, 0);  // August 1st
+const DateTime MORNING_CALL_TIME = DateTime(0, 0, 0, 6, 30, 0);  // 6:30 am BST
+const DateTime EVENING_CALL_TIME = DateTime(0, 0, 0, 16, 00, 0); // 16:00 pm BST
+const DateTime SEASON_START_TIME = DateTime(0, 5, 1, 6, 20, 0);  // May 1st at 6:20 am BST
+const DateTime SEASON_END_TIME   = DateTime(0, 8, 1, 0, 0, 0);   // August 1st
 
-tmElements_t playForTime;
+const tmElements_t playForTime = {2, 30, 0};
 
 RTC_DS3231 rtc;
 
@@ -64,10 +64,6 @@ void setup() {
     initRTC();
     initDFPlayer();
     setAlarms();
-
-    playForTime.Hour = 0;
-    playForTime.Minute = 1;
-    playForTime.Second = 0;
 
 }
 
@@ -232,6 +228,7 @@ unsigned long timeToMillis(tmElements_t time) {
 
     unsigned long timeMillis = time.Hour * 60UL * 60UL * 1000UL;
     timeMillis += (time.Minute * 60UL * 1000UL);
+    timeMillis += (time.Second * 1000UL);
     return timeMillis;
 
 }
