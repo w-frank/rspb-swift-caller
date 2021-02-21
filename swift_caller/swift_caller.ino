@@ -41,7 +41,7 @@
 const int INTERRUPT_PIN = 3;
 const int DFPLAYER_PWR_PIN = 9;
 
-const DateTime MORNING_CALL_TIME = DateTime(0, 0, 0, 11, 04, 0);  // 6:30 am BST
+const DateTime MORNING_CALL_TIME = DateTime(0, 0, 0, 11, 10, 0); // 6:30 am BST
 const DateTime EVENING_CALL_TIME = DateTime(0, 0, 0, 17, 53, 0); // 16:00 pm BST
 const DateTime SEASON_START_TIME = DateTime(0, 1, 1, 6, 20, 0);  // May 1st at 6:20 am BST
 const DateTime SEASON_END_TIME   = DateTime(0, 12, 29, 0, 0, 0); // August 1st
