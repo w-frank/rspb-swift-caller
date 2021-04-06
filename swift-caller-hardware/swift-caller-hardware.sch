@@ -1,5 +1,4 @@
 EESchema Schematic File Version 4
-LIBS:swift-caller-hardware-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
@@ -8,8 +7,8 @@ Sheet 1 1
 Title "Swift Caller"
 Date "2021-02-21"
 Rev "0.01"
-Comp "Will Frank Designs"
-Comment1 ""
+Comp "RSPB"
+Comment1 "Designer: Will Frank"
 Comment2 ""
 Comment3 ""
 Comment4 ""
@@ -38,53 +37,16 @@ Wire Wire Line
 Wire Wire Line
 	9150 4400 9200 4400
 $Comp
-L Device:Solar_Cells SC1
-U 1 1 6032913F
-P 2450 1850
-F 0 "SC1" H 2558 1896 50  0000 L CNN
-F 1 "6V/2W" H 2558 1805 50  0000 L CNN
-F 2 "" V 2450 1910 50  0001 C CNN
-F 3 "~" V 2450 1910 50  0001 C CNN
-	1    2450 1850
-	1    0    0    -1  
-$EndComp
-$Comp
 L Device:Battery_Cell BT1
 U 1 1 60329DE0
-P 3300 1850
-F 0 "BT1" H 3418 1946 50  0000 L CNN
-F 1 "Battery_Cell" H 3418 1855 50  0000 L CNN
-F 2 "" V 3300 1910 50  0001 C CNN
-F 3 "~" V 3300 1910 50  0001 C CNN
-	1    3300 1850
+P 5400 1750
+F 0 "BT1" H 5518 1846 50  0000 L CNN
+F 1 "3.7V 10500mAh" H 5518 1755 50  0000 L CNN
+F 2 "" V 5400 1810 50  0001 C CNN
+F 3 "~" V 5400 1810 50  0001 C CNN
+	1    5400 1750
 	1    0    0    -1  
 $EndComp
-$Comp
-L power:+5V #PWR03
-U 1 1 6032A68D
-P 3300 1600
-F 0 "#PWR03" H 3300 1450 50  0001 C CNN
-F 1 "+5V" H 3315 1773 50  0000 C CNN
-F 2 "" H 3300 1600 50  0001 C CNN
-F 3 "" H 3300 1600 50  0001 C CNN
-	1    3300 1600
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR04
-U 1 1 6032AD07
-P 3300 2000
-F 0 "#PWR04" H 3300 1750 50  0001 C CNN
-F 1 "GND" H 3305 1827 50  0000 C CNN
-F 2 "" H 3300 2000 50  0001 C CNN
-F 3 "" H 3300 2000 50  0001 C CNN
-	1    3300 2000
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	3300 2000 3300 1950
-Wire Wire Line
-	3300 1650 3300 1600
 $Comp
 L power:+5V #PWR010
 U 1 1 6032B549
@@ -277,31 +239,18 @@ Wire Wire Line
 Wire Wire Line
 	9200 4600 9150 4600
 $Comp
-L power:+5V #PWR01
-U 1 1 6033B76D
-P 2450 1600
-F 0 "#PWR01" H 2450 1450 50  0001 C CNN
-F 1 "+5V" H 2465 1773 50  0000 C CNN
-F 2 "" H 2450 1600 50  0001 C CNN
-F 3 "" H 2450 1600 50  0001 C CNN
-	1    2450 1600
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	2450 1600 2450 1650
-$Comp
 L power:GND #PWR02
 U 1 1 6033C4C8
-P 2450 2100
-F 0 "#PWR02" H 2450 1850 50  0001 C CNN
-F 1 "GND" H 2455 1927 50  0000 C CNN
-F 2 "" H 2450 2100 50  0001 C CNN
-F 3 "" H 2450 2100 50  0001 C CNN
-	1    2450 2100
+P 1200 2100
+F 0 "#PWR02" H 1200 1850 50  0001 C CNN
+F 1 "GND" H 1205 1927 50  0000 C CNN
+F 2 "" H 1200 2100 50  0001 C CNN
+F 3 "" H 1200 2100 50  0001 C CNN
+	1    1200 2100
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	2450 2100 2450 2050
+	1200 2100 1200 2050
 NoConn ~ 9150 3600
 NoConn ~ 9150 3500
 $Comp
@@ -534,8 +483,8 @@ Text Notes 7750 2900 0    79   ~ 0
 MCU - Arduino Pro Mini\n
 Text Notes 7800 1000 0    79   ~ 0
 RTC + Backup Battery\n\n
-Text Notes 2250 1300 0    79   ~ 0
-Solar Panel + Battery\n\n
+Text Notes 2250 1100 0    79   ~ 0
+Solar Panel + Li-Ion Battery Pack\n\n\n
 Text Notes 2500 3550 0    79   ~ 0
 MP3 Player
 Wire Wire Line
@@ -631,5 +580,252 @@ F 2 "" H 1750 4800 50  0001 C CNN
 F 3 "~" H 1740 4950 50  0001 C CNN
 	1    1750 5000
 	-1   0    0    -1  
+$EndComp
+$Comp
+L Battery_Management:MCP73831-2-OT U?
+U 1 1 606CB89E
+P 3200 1800
+F 0 "U?" H 3200 2281 50  0000 C CNN
+F 1 "MCP73831-2-OT" H 3550 2050 50  0000 C CNN
+F 2 "Package_TO_SOT_SMD:SOT-23-5" H 3250 1550 50  0001 L CIN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/20001984g.pdf" H 3050 1750 50  0001 C CNN
+	1    3200 1800
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 606CC560
+P 3200 2250
+F 0 "#PWR?" H 3200 2000 50  0001 C CNN
+F 1 "GND" H 3205 2077 50  0000 C CNN
+F 2 "" H 3200 2250 50  0001 C CNN
+F 3 "" H 3200 2250 50  0001 C CNN
+	1    3200 2250
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 606D0C4A
+P 5400 1900
+F 0 "#PWR?" H 5400 1650 50  0001 C CNN
+F 1 "GND" H 5405 1727 50  0000 C CNN
+F 2 "" H 5400 1900 50  0001 C CNN
+F 3 "" H 5400 1900 50  0001 C CNN
+	1    5400 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5400 1900 5400 1850
+Wire Wire Line
+	5400 1450 5400 1550
+Text Notes 1950 1100 0    79   ~ 0
+(Adafruit MicroLipo/MiniLipo Battery Charger)
+$Comp
+L Device:C C?
+U 1 1 606EAC84
+P 2000 1850
+F 0 "C?" H 2115 1896 50  0000 L CNN
+F 1 "10uF" H 2115 1805 50  0000 L CNN
+F 2 "" H 2038 1700 50  0001 C CNN
+F 3 "~" H 2000 1850 50  0001 C CNN
+	1    2000 1850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2000 1700 2000 1450
+$Comp
+L power:GND #PWR?
+U 1 1 606ED4D1
+P 2000 2100
+F 0 "#PWR?" H 2000 1850 50  0001 C CNN
+F 1 "GND" H 2005 1927 50  0000 C CNN
+F 2 "" H 2000 2100 50  0001 C CNN
+F 3 "" H 2000 2100 50  0001 C CNN
+	1    2000 2100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2000 2100 2000 2000
+$Comp
+L Device:C C?
+U 1 1 606F9E98
+P 4950 1700
+F 0 "C?" H 5065 1746 50  0000 L CNN
+F 1 "10uF" H 5065 1655 50  0000 L CNN
+F 2 "" H 4988 1550 50  0001 C CNN
+F 3 "~" H 4950 1700 50  0001 C CNN
+	1    4950 1700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4950 1550 4950 1450
+Wire Wire Line
+	4950 1450 5400 1450
+$Comp
+L power:GND #PWR?
+U 1 1 606FC73C
+P 4950 1900
+F 0 "#PWR?" H 4950 1650 50  0001 C CNN
+F 1 "GND" H 4955 1727 50  0000 C CNN
+F 2 "" H 4950 1900 50  0001 C CNN
+F 3 "" H 4950 1900 50  0001 C CNN
+	1    4950 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4950 1900 4950 1850
+$Comp
+L Device:LED D?
+U 1 1 60704B62
+P 4050 1700
+F 0 "D?" V 4089 1582 50  0000 R CNN
+F 1 "RED" V 3998 1582 50  0000 R CNN
+F 2 "" H 4050 1700 50  0001 C CNN
+F 3 "~" H 4050 1700 50  0001 C CNN
+	1    4050 1700
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 60708870
+P 3850 1900
+F 0 "R?" V 3950 1900 50  0000 C CNN
+F 1 "470R" V 3850 1900 50  0000 C CNN
+F 2 "" V 3780 1900 50  0001 C CNN
+F 3 "~" H 3850 1900 50  0001 C CNN
+	1    3850 1900
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	4000 1900 4050 1900
+Wire Wire Line
+	4050 1900 4050 1850
+Wire Wire Line
+	3200 1500 3200 1450
+Connection ~ 3200 1450
+$Comp
+L Device:R R?
+U 1 1 60730701
+P 3850 2100
+F 0 "R?" V 3950 2100 50  0000 C CNN
+F 1 "470R" V 3850 2100 50  0000 C CNN
+F 2 "" V 3780 2100 50  0001 C CNN
+F 3 "~" H 3850 2100 50  0001 C CNN
+	1    3850 2100
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3600 1900 3650 1900
+Wire Wire Line
+	4050 1550 4050 1450
+Wire Wire Line
+	3200 1450 4050 1450
+Wire Wire Line
+	3700 2100 3650 2100
+Wire Wire Line
+	3650 2100 3650 1900
+Connection ~ 3650 1900
+Wire Wire Line
+	3650 1900 3700 1900
+$Comp
+L Device:LED D?
+U 1 1 6073C447
+P 4050 2300
+F 0 "D?" V 4089 2182 50  0000 R CNN
+F 1 "GREEN" V 3998 2182 50  0000 R CNN
+F 2 "" H 4050 2300 50  0001 C CNN
+F 3 "~" H 4050 2300 50  0001 C CNN
+	1    4050 2300
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	4000 2100 4050 2100
+Wire Wire Line
+	4050 2100 4050 2150
+$Comp
+L power:GND #PWR?
+U 1 1 6073FA80
+P 4050 2500
+F 0 "#PWR?" H 4050 2250 50  0001 C CNN
+F 1 "GND" H 4055 2327 50  0000 C CNN
+F 2 "" H 4050 2500 50  0001 C CNN
+F 3 "" H 4050 2500 50  0001 C CNN
+	1    4050 2500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4050 2500 4050 2450
+Text GLabel 3650 1700 2    50   Input ~ 0
+VBAT
+Wire Wire Line
+	3650 1700 3600 1700
+Text GLabel 4900 1450 0    50   Input ~ 0
+VBAT
+Wire Wire Line
+	4900 1450 4950 1450
+Connection ~ 4950 1450
+$Comp
+L Device:R R?
+U 1 1 60753D08
+P 2600 1900
+F 0 "R?" V 2700 1900 50  0000 C CNN
+F 1 "10k" V 2600 1900 50  0000 C CNN
+F 2 "" V 2530 1900 50  0001 C CNN
+F 3 "~" H 2600 1900 50  0001 C CNN
+	1    2600 1900
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 60754067
+P 2600 2200
+F 0 "R?" V 2700 2200 50  0000 C CNN
+F 1 "2k2" V 2600 2200 50  0000 C CNN
+F 2 "" V 2530 2200 50  0001 C CNN
+F 3 "~" H 2600 2200 50  0001 C CNN
+	1    2600 2200
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	2750 2200 3200 2200
+Wire Wire Line
+	3200 2100 3200 2200
+Wire Wire Line
+	3200 2250 3200 2200
+Connection ~ 3200 2200
+Wire Wire Line
+	2750 1900 2800 1900
+$Comp
+L Jumper:SolderJumper_2_Open JP?
+U 1 1 60763C80
+P 2350 2050
+F 0 "JP?" V 2304 2118 50  0000 L CNN
+F 1 "SJ" V 2395 2118 50  0000 L CNN
+F 2 "" H 2350 2050 50  0001 C CNN
+F 3 "~" H 2350 2050 50  0001 C CNN
+	1    2350 2050
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2350 1900 2450 1900
+Wire Wire Line
+	2450 2200 2350 2200
+Connection ~ 2000 1450
+Wire Wire Line
+	2000 1450 3200 1450
+Wire Wire Line
+	1200 1650 1200 1450
+Wire Wire Line
+	1200 1450 2000 1450
+$Comp
+L Device:Solar_Cells SC1
+U 1 1 6032913F
+P 1200 1850
+F 0 "SC1" H 1308 1896 50  0000 L CNN
+F 1 "2W 5.5V 360mA" H 1308 1805 50  0000 L CNN
+F 2 "" V 1200 1910 50  0001 C CNN
+F 3 "~" V 1200 1910 50  0001 C CNN
+	1    1200 1850
+	1    0    0    -1  
 $EndComp
 $EndSCHEMATC
