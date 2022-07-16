@@ -1,7 +1,7 @@
 /**
- * Copyright (C) 2021 Will Frank
+ * Copyright (C) 2022 Will Frank
  *                                             
- * This file is part of the Swift Caller.                                          
+ * This file is part of the RSPB Swift Caller.                                          
  * 
  *    This program is free software: you can redistribute it and/or modify  
  *    it under the terms of the GNU General Public License as published by  
@@ -21,12 +21,6 @@
  * @author Will Frank
  * @date 22 Nov 2020
  * @brief Main program for the Swift Caller.
- *
- * Here typically goes a more extensive explanation of what the program
- * does and any dependencies. Doxygens tags are words preceeded by either 
- * a backslash @\ or by an at symbol @@.
- * @see http://www.stack.nl/~dimitri/doxygen/docblocks.html
- * @see http://www.stack.nl/~dimitri/doxygen/commands.html
  */
 
 // Arduino low power modes
@@ -34,25 +28,19 @@
 // Date and time functions using a DS3231 RTC connected via I2C and Wire lib
 #include <RTClib.h>
 #include <TimeLib.h>
-// DFPlayer MP3 player library and software serial communication
-#include "SoftwareSerial.h"
-#include <DFRobotDFPlayerMini.h>
 
-const int INTERRUPT_PIN = 3;
-const int DFPLAYER_PWR_PIN = 9;
+const int INTERRUPT_PIN = 2;
+const int MP3_PLAYER_PIN = 3;
 
-const DateTime MORNING_CALL_TIME = DateTime(0, 0, 0, 11, 10, 0); // 6:30 am BST
-const DateTime EVENING_CALL_TIME = DateTime(0, 0, 0, 17, 53, 0); // 16:00 pm BST
-const DateTime SEASON_START_TIME = DateTime(0, 1, 1, 6, 20, 0);  // May 1st at 6:20 am BST
-const DateTime SEASON_END_TIME   = DateTime(0, 12, 29, 0, 0, 0); // August 1st
+const DateTime MORNING_CALL_TIME = DateTime(0, 0, 0, 6, 30, 0);  // 6:30 am BST
+const DateTime EVENING_CALL_TIME = DateTime(0, 0, 0, 18, 00, 0); // 18:00 pm BST
+const DateTime SEASON_START_TIME = DateTime(0, 5, 1, 6, 20, 0);  // May 1st at 6:20 am BST
+const DateTime SEASON_END_TIME   = DateTime(0, 8, 1, 0, 0, 0);   // August 1st
 
-const tmElements_t playForTime = {2, 30, 0}; // How long to play swift calls for
+const tmElements_t playForTime = {0, 0, 1}; // How long to play swift calls for (secs, mins, hours)
 
 RTC_DS3231 rtc;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-
-SoftwareSerial dfPlayerSoftwareSerial(10, 11); // DFPlayer RX, TX
-DFRobotDFPlayerMini dfPlayer;
 
 /**
  * Initialisation.
@@ -62,14 +50,9 @@ void setup() {
     Serial.begin(115200);
     Serial.println("--- Swift Caller ---");
 
-    pinMode(DFPLAYER_PWR_PIN, OUTPUT);
-    // Turn on DFPlayer to initialise
-    digitalWrite(DFPLAYER_PWR_PIN, HIGH);
-    // Wait for DFPlayer to switch on
-    delay(1000);
+    pinMode(MP3_PLAYER_PIN, OUTPUT);
 
     initRTC();
-    initDFPlayer();
     setAlarms();
 
 }
@@ -87,13 +70,8 @@ void loop() {
 
     Serial.println("Awake! Playing swift calls...");
 
-    // Turn on DFPlayer
-    digitalWrite(DFPLAYER_PWR_PIN, HIGH);
-    // Wait for DFPlayer to switch on
-    delay(1000);
-
-    // loop through all available mp3s for playForTime
-    dfPlayer.enableLoopAll();
+    // Turn on MP3 player
+    digitalWrite(MP3_PLAYER_PIN, HIGH);
 
     static unsigned long timer = millis();
   
@@ -101,7 +79,8 @@ void loop() {
         // continue looping mp3s for playForTime
     }
 
-    dfPlayer.disableLoopAll();
+    // Turn OFF MP3 player
+    digitalWrite(MP3_PLAYER_PIN, LOW);
  
     setAlarms();
 
@@ -169,21 +148,6 @@ void initRTC() {
 }
 
 /**
- * DFPlayer initialisation.
- */
-void initDFPlayer() {
-
-    dfPlayerSoftwareSerial.begin(9600);
-
-    if (!dfPlayer.begin(dfPlayerSoftwareSerial)) {
-        Serial.println("Error: unable to begin DFPlayer");
-    }
-
-    dfPlayer.volume(30); // range from 0 to 30
-
-}
-
-/**
  * Send Arduino to sleep and attach wake interrupt.
  */
 void sendToSleep() {
@@ -191,9 +155,9 @@ void sendToSleep() {
     Serial.println("Sending to sleep... zzz");
     delay(1000); // wait for serial print
 
-    // Turn off DFPlayer
-    digitalWrite(DFPLAYER_PWR_PIN, LOW);
-    // wait for DFPlayer to switch off
+    // Turn off MP3 player
+    digitalWrite(MP3_PLAYER_PIN, LOW);
+    // wait for MP3 player to switch off
     delay(1000);
 
     // Enter power down state with ADC and BOD module disabled
@@ -228,7 +192,13 @@ void setAlarms() {
             Serial.println("Error: failed to set AM alarm");
         }
         else {
-            Serial.println("AM alarm set");  
+            Serial.print("AM alarm set: ");
+            Serial.print(MORNING_CALL_TIME.hour(), DEC);
+            Serial.print(':');
+            Serial.print(MORNING_CALL_TIME.minute(), DEC);
+            Serial.print(':');
+            Serial.print(MORNING_CALL_TIME.second(), DEC);
+            Serial.println();  
         }
 
         // set Alarm 2 when hours and minutes = PM call time
@@ -236,7 +206,13 @@ void setAlarms() {
             Serial.println("Error: failed to set PM alarm");
         }
         else {
-            Serial.println("PM alarm set");  
+            Serial.print("PM alarm set: ");
+            Serial.print(EVENING_CALL_TIME.hour(), DEC);
+            Serial.print(':');
+            Serial.print(EVENING_CALL_TIME.minute(), DEC);
+            Serial.print(':');
+            Serial.print(EVENING_CALL_TIME.second(), DEC);
+            Serial.println();  
         }
     }
     else {
